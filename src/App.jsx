@@ -10,8 +10,8 @@ import { Controller, useForm } from "react-hook-form"
 function App() {
   const [state, setState] = useState({ focus: "" })
 
-  const handleInputFocus = (evt) => {
-    setState((prev) => ({ ...prev, focus: evt.target.name }))
+  const handleInputFocus = (e) => {
+    setState((prev) => ({ ...prev, focus: e.target.name }))
   }
 
   const {
@@ -19,6 +19,7 @@ function App() {
     control,
     watch,
     formState: { errors },
+    getValues,
   } = useForm({
     defaultValues: {
       name: "",
@@ -27,12 +28,14 @@ function App() {
       cvc: "",
     },
   })
+  const values = getValues()
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data)
+    console.log({ data })
+    console.log({ values })
   })
   {
-    console.log(errors.number)
+    // console.log(errors.number)
   }
 
   return (
@@ -47,13 +50,14 @@ function App() {
       }}
     >
       <Paper
-        elevation={2}
+        elevation={3}
         sx={{
           p: 10,
         }}
       >
         <Cards
           name={watch("name")}
+          //number={getValues("number")} nope
           number={watch("number")}
           expiry={watch("expiry")}
           cvc={watch("cvc")}
@@ -79,19 +83,22 @@ function App() {
               />
             )}
           />
-          {/* //TODO validations onChage (?) */}
+          {/* //TODO validations onChage (? */}
           <Controller
             name="number"
             control={control}
             render={({ field }) => (
               <TextField
                 label="Number"
+                error={!!errors.number}
+                helperText={errors.number && "16 dígitos maestro"}
                 variant="outlined"
                 onFocus={handleInputFocus}
                 type="number"
                 inputProps={{
                   maxLength: 16,
                 }}
+                //aria-invalid={errors.number ? "true" : "false"}
                 fullWidth
                 {...field}
               />
@@ -107,18 +114,20 @@ function App() {
                 maxLength: 4,
                 message: "error",
               }, */
-              validate: (value) =>
-                value.length > 5 || "Los passwords no coinciden",
+
+              //validate: (value) => value.length === 16 || "Ingrese 16 dígitos",
+              validate: (value) => value.length === 16,
             }}
           />
 
-          {errors.number && <span>{errors.number.message}</span>}
+          {/* {errors.number && <span role="alert">{errors.number.message}</span>} */}
           <Controller
             name="expiry"
             control={control}
             render={({ field }) => (
               <TextField
                 label="Expiry"
+                placeholder="11/25"
                 variant="outlined"
                 onFocus={handleInputFocus}
                 fullWidth
