@@ -3,6 +3,7 @@ import { useState } from "react"
 import Cards from "react-credit-cards-2"
 import "react-credit-cards-2/dist/es/styles-compiled.css"
 import "./App.css"
+import { useForm } from "react-hook-form"
 
 function App() {
   const [state, setState] = useState({
@@ -11,6 +12,16 @@ function App() {
     cvc: "",
     name: "",
     focus: "",
+  })
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm()
+
+  const onSubmit = handleSubmit((data) => {
+    console.log(data)
   })
 
   const handleInputChange = (evt) => {
@@ -24,7 +35,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div style={{ background: "red" }}>
       <Cards
         number={state.number}
         expiry={state.expiry}
@@ -32,8 +43,9 @@ function App() {
         name={state.name}
         focused={state.focus}
       />
-      <form>
+      <form onSubmit={onSubmit}>
         <input
+          {...register("name")}
           type="text"
           name="name"
           placeholder="Name"
@@ -42,14 +54,21 @@ function App() {
           onFocus={handleInputFocus}
         />
         <input
+          {...register("cardNumber")}
           type="number"
           name="number"
           placeholder="Card Number"
           value={state.number}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
-        />{" "}
+        />
         <input
+          {...register("expiryDate", {
+            required: {
+              value: true,
+              message: "La fecha de expiración es requerida.",
+            },
+          })}
           type="tel"
           name="expiry"
           placeholder="MM/YY"
@@ -57,7 +76,12 @@ function App() {
           onChange={handleInputChange}
           onFocus={handleInputFocus}
         />
+        {errors.expiryDate && <span>{errors.expiryDate.message}</span>}
         <input
+          {...register("cvc", {
+            validate: (value) =>
+              value.length === 3 || "Debe contener 3 números",
+          })}
           type="number"
           name="cvc"
           placeholder="CVC"
@@ -65,6 +89,8 @@ function App() {
           onChange={handleInputChange}
           onFocus={handleInputFocus}
         />
+        {errors.cvc && <span>{errors.cvc.message}</span>}
+        <button>Enviar</button>
       </form>
     </div>
   )
